@@ -2,18 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@layer base {
+  /* Design tokens are RGB channels so Tailwind can apply opacity modifiers. */
+  :root {
+    color-scheme: light;
+    --color-canvas: 247 245 243;
+    --color-surface: 255 255 255;
+    --color-subtle: 241 238 235;
+    --color-line: 226 221 216;
+    --color-line-strong: 140 132 126;
+    --color-ink: 28 25 23;
+    --color-ink-muted: 87 80 75;
+    --color-brand: 138 21 56;
+    --color-brand-hover: 111 15 44;
+    --color-brand-soft: 250 235 239;
+    --color-brand-ink: 138 21 56;
+    --color-danger: 180 35 24;
+    --color-danger-soft: 254 236 233;
+    --color-danger-ink: 161 28 18;
+    --color-success-soft: 229 245 236;
+    --color-success-ink: 22 101 62;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --color-canvas: 18 15 16;
+    --color-surface: 28 24 25;
+    --color-subtle: 39 34 35;
+    --color-line: 56 49 50;
+    --color-line-strong: 122 110 111;
+    --color-ink: 244 240 239;
+    --color-ink-muted: 184 173 171;
+    --color-brand: 190 44 84;
+    --color-brand-hover: 173 36 74;
+    --color-brand-soft: 62 24 34;
+    --color-brand-ink: 247 160 181;
+    --color-danger: 185 45 45;
+    --color-danger-soft: 69 20 20;
+    --color-danger-ink: 252 165 165;
+    --color-success-soft: 20 50 34;
+    --color-success-ink: 134 239 172;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--color-brand-ink));
+    outline-offset: 2px;
+  }
+
+  /* A modal <dialog> does not stop the page behind it from scrolling. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-body {
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  background-color: gray;
-  color: black;
-}
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-surface shadow-card;
+  }
 
-.dark body {
-  background-color: #0a0a0a;
-  color: #ededed;
+  .field-control {
+    @apply block min-h-11 w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-base text-ink transition-colors placeholder:text-ink-muted/70 hover:border-ink-muted disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm;
+  }
+
+  .field-control[aria-invalid="true"] {
+    @apply border-danger-ink;
+  }
 }

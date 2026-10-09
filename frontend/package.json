@@ -1,25 +1,34 @@
 {
-  "name": "fitness-web-app",
-   "proxy": "http://localhost:5233",
-  "version": "0.1.0",
+  "name": "actora-web",
+  "version": "1.0.0",
+  "description": "Web client for Actora, a fitness community and goal-tracking app",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint .",
+    "test": "vitest run"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@tanstack/react-query": "^5.90.6",
     "axios": "^1.13.1",
-    "next": "15.5.6",
+    "next": "15.5.27",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "recharts": "^3.3.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
     "autoprefixer": "^10.4.21",
+    "eslint": "^9.37.0",
+    "eslint-config-next": "15.5.27",
     "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.18"
+    "tailwindcss": "^3.4.18",
+    "vitest": "^5.0.3"
   }
 }

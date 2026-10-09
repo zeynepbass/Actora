@@ -1,199 +1,152 @@
-import Kullanici from "../models/kullanici.js";
 import bcrypt from "bcryptjs";
-import multer from "multer";
-import jwt from "jsonwebtoken";
+import Kullanici from "../models/kullanici.js";
+import Post from "../models/post.js";
+import { signToken } from "../middleware/auth.js";
+import { HttpError } from "../middleware/errorHandler.js";
+import { removeUpload } from "../middleware/upload.js";
+import { toPublicUser } from "../utils/serializers.js";
+import {
+  FROZEN_STATUS,
+  validateCredentials,
+  validateProfileUpdate,
+  validateRegistration,
+} from "../utils/validation.js";
+
+const CASE_INSENSITIVE = { locale: "en", strength: 2 };
+// Compared against when the e-mail is unknown so both failure paths cost the same.
+const PLACEHOLDER_HASH = bcrypt.hashSync("actora-placeholder", 10);
+
+const findByEmail = (email) => Kullanici.findOne({ email }).collation(CASE_INSENSITIVE);
+
+function assertValid({ valid, errors }) {
+  if (!valid) throw new HttpError(400, Object.values(errors)[0], errors);
+}
 
 export const login = async (req, res) => {
+  const validation = validateCredentials(req.body);
+  assertValid(validation);
+  const { email, parola } = validation.value;
+
+  const kullanici = await findByEmail(email);
+  const match = await bcrypt.compare(parola, kullanici?.parola ?? PLACEHOLDER_HASH);
+  if (!kullanici || !match) {
+    throw new HttpError(401, "E-posta veya parola hatalı");
+  }
+
+  // Signing in again is how a frozen account is reactivated.
+  const reactivated = kullanici.durum === FROZEN_STATUS;
+  if (reactivated) {
+    kullanici.durum = null;
+    await kullanici.save();
+  }
+
+  res.status(200).json({
+    message: reactivated ? "Hesabın yeniden etkinleştirildi" : "Giriş başarılı",
+    kullanici: toPublicUser(kullanici),
+    token: signToken(kullanici, req.app.get("jwtSecret")),
+  });
+};
+
+export const kayitOl = async (req, res) => {
+  const validation = validateRegistration(req.body);
+  assertValid(validation);
+  const { adSoyad, email, parola, rol } = validation.value;
+
+  if (await findByEmail(email)) {
+    throw new HttpError(409, "Bu e-posta zaten kayıtlı", { email: "Bu e-posta zaten kayıtlı" });
+  }
+
+  const kullanici = await Kullanici.create({
+    adSoyad,
+    email,
+    parola: await bcrypt.hash(parola, 10),
+    rol,
+  });
+
+  res.status(201).json({
+    message: "Kullanıcı başarıyla oluşturuldu",
+    kullanici: toPublicUser(kullanici),
+  });
+};
+
+export const kullaniciDetay = async (req, res) => {
+  res.status(200).json(toPublicUser(req.user));
+};
+
+function applyGoalStart(update, current) {
+  if (!("hedefKg" in update) && !("kacGun" in update)) return;
+
+  const hedefKg = update.hedefKg ?? (("hedefKg" in update) ? null : current.hedefKg);
+  const kacGun = update.kacGun ?? (("kacGun" in update) ? null : current.kacGun);
+  const changed = hedefKg !== (current.hedefKg ?? null) || kacGun !== (current.kacGun ?? null);
+
+  if (!hedefKg || !kacGun) update.baslangicTarihi = null;
+  else if (changed || !current.baslangicTarihi) update.baslangicTarihi = new Date();
+}
+
+export const kullaniciGuncelle = async (req, res) => {
+  const current = req.user;
+  const uploaded = req.file?.publicPath;
+
   try {
-    const { email, parola } = req.body;
-
-
-    const kullanici = await Kullanici.findOne({ email });
-    if (!kullanici) {
-      return res.status(400).json({ message: "Email bulunamadı" });
+    if (req.body.durum === FROZEN_STATUS) {
+      current.durum = FROZEN_STATUS;
+      await current.save();
+      await removeUpload(uploaded);
+      return res.status(200).json({
+        message: "Kullanıcı hesabı donduruldu",
+        kullanici: toPublicUser(current),
+      });
     }
 
+    const validation = validateProfileUpdate(req.body);
+    assertValid(validation);
+    const update = validation.value;
 
-    const match = await bcrypt.compare(parola, kullanici.parola);
-    if (!match) {
-      return res.status(400).json({ message: "Parola yanlış" });
+    const previousEmail = current.email;
+    const emailChanged =
+      update.email !== undefined && update.email !== previousEmail.toLowerCase();
+    if (emailChanged) {
+      const owner = await findByEmail(update.email);
+      if (owner && String(owner._id) !== String(current._id)) {
+        throw new HttpError(409, "Bu e-posta zaten kayıtlı", {
+          email: "Bu e-posta zaten kayıtlı",
+        });
+      }
+    } else {
+      delete update.email;
     }
 
+    applyGoalStart(update, current);
+    const previousImage = current.resim;
+    if (uploaded) update.resim = uploaded;
 
-    const token = jwt.sign(
-      { id: kullanici._id, email: kullanici.email },
-      process.env.JWT_SECRET || "secretkey123",
-      { expiresIn: "1d" }
-    );
+    current.set(update);
+    await current.save();
 
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, 
-    });
-
+    if (emailChanged) {
+      await Post.updateMany({ email: previousEmail }, { email: current.email });
+    }
+    if (uploaded) await removeUpload(previousImage);
 
     res.status(200).json({
-      message: "Giriş başarılı",
-      kullanici: {
-        id: kullanici._id,
-        ad: kullanici.ad,
-        email: kullanici.email,
-        rol: kullanici.rol,
-      },
-      token, 
+      message: "Kullanıcı başarıyla güncellendi",
+      kullanici: toPublicUser(current),
     });
   } catch (error) {
-    res.status(500).json({ message: "Giriş yapılamadı", error: error.message });
+    await removeUpload(uploaded);
+    throw error;
   }
 };
-
-  const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, "./uploads"); 
-      
-    },
-    filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      cb(null, uniqueSuffix + "-" + file.originalname);
-    },
-  });
-  
-  export const upload = multer({ storage });
-  
-  export const kayitOl = async (req, res) => {
-    try {
-      const { adSoyad, email, parola, rol } = req.body;
-  
-      if (!email || !parola) {
-        return res.status(400).json({ message: "Email ve parola gerekli" });
-      }
-  
-      const mevcutKullanici = await Kullanici.findOne({ email });
-      if (mevcutKullanici) {
-        return res.status(400).json({ message: "Bu email zaten kayıtlı" });
-      }
-  
-      const hashedParola = await bcrypt.hash(parola, 10);
-      const yeniKullanici = new Kullanici({
-        adSoyad: adSoyad, 
-        email,
-        parola: hashedParola,
-        rol: rol || "eğitmen",
-        resim: req.file ? req.file.filename : null,
-      });
-  
-      await yeniKullanici.save();
-
-      res.status(201).json({ message: "Kullanıcı başarıyla oluşturuldu", yeniKullanici });
-    } catch (error) {
-      res.status(500).json({ message: "Kullanıcı oluşturulamadı", error: error.message });
-    }
-  };
-export const kullaniciDetay = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const detay = await Kullanici.findById(id);
-    if (!detay) {
-      return res.status(404).json({ message: "Kullanıcı bulunamadı" });
-    }
-    res.status(200).json(detay);
-  } catch (err) {
-    res.status(500).json({ message: "Detaylar getirilemedi", error: err.message });
-  }
-};
-
-
-
-
-export const kullaniciGuncelle = [
-  upload.single("resim"),
-  async (req, res) => {
-    try {
-      const { id } = req.params;
-      const {
-        adSoyad,
-        email,
-
-        kullaniciAdi,
-        weight,
-        height,
-        hedefKg,
-        kacGun,
-        deneyim,
-        rol,
-        resim,
-        durum,
-      } = req.body;
-
-      let updateData = {};
-
-      
-      if (durum === "dondurulmuştur") {
-        updateData.durum = "dondurulmuştur";
-      } else {
-        updateData = {
-          adSoyad,
-          email,
-  
-          kullaniciAdi,
-          weight,
-          height,
-          hedefKg,
-          kacGun,
-          deneyim,
-          rol,
-          resim,
-          durum,
-        };
-
-        if (req.file) {
-          updateData.resim = req.file.filename;
-        }
-
-      }
-
-      const guncellenmisKullanici = await Kullanici.findByIdAndUpdate(
-        id,
-        updateData,
-        { new: true, runValidators: true }
-      );
-
-      if (!guncellenmisKullanici) {
-        return res.status(404).json({ message: "Kullanıcı bulunamadı" });
-      }
-
-      res.status(200).json({
-        message:
-          durum === "dondurulmuştur"
-            ? "Kullanıcı hesabı donduruldu"
-            : "Kullanıcı başarıyla güncellendi",
-        kullanici: guncellenmisKullanici,
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: "Kullanıcı güncellenemedi",
-        error: error.message,
-      });
-    }
-  },
-];
-
-
 
 export const deleteUser = async (req, res) => {
-  try {
-    const { id } = req.params;
+  const { _id, email, resim } = req.user;
 
-    const kullanici = await Kullanici.findByIdAndDelete(id);
+  const posts = await Post.find({ email }).select("resim");
+  await Post.deleteMany({ email });
+  await Post.updateMany({ begenenler: _id }, { $pull: { begenenler: _id } });
+  await Kullanici.deleteOne({ _id });
+  await Promise.all([resim, ...posts.map((post) => post.resim)].map(removeUpload));
 
-    if (!kullanici) {
-      return res.status(404).json({ message: "Kullanıcı bulunamadı" });
-    }
-
-    res.status(200).json({ message: "Kullanıcı başarıyla silindi" });
-  } catch (error) {
-    res.status(500).json({ message: "Silme işlemi başarısız", error: error.message });
-  }
+  res.status(200).json({ message: "Kullanıcı başarıyla silindi" });
 };

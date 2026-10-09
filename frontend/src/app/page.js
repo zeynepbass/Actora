@@ -1,5 +1,7 @@
-import UsersPage from "./screens/UsersPage"
-import "./globals.css";
-export default function Home() {
-  return <UsersPage/>
+import AuthScreen from "@/features/auth/AuthScreen";
+
+export const metadata = { title: "Giriş yap" };
+
+export default function HomePage() {
+  return <AuthScreen />;
 }
