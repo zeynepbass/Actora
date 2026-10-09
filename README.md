@@ -1,196 +1,163 @@
 # Actora
 
-Actora is a fitness community web app. Members share workout and nutrition posts, set a weight goal with a deadline, and follow their progress. The interface is in Turkish.
+Actora, bir fitness topluluğu web uygulamasıdır. Üyeler antrenman ve beslenme paylaşımları yapabilir, belirli bir tarihe yönelik kilo hedefleri belirleyebilir ve ilerlemelerini takip edebilir. Arayüz tamamen Türkçedir.
 
-![Feed on desktop](docs/screenshots/feed-desktop.png)
+![Masaüstünde akış sayfası](docs/screenshots/feed-desktop.png)
 
-## What it solves
+## Ne İşe Yarar?
 
-People working towards a weight goal usually keep their plan in one place and their motivation in another. Actora puts both together: a personal goal with a countdown, and a feed where trainers and members post what they actually did. When a goal period ends, the app prompts the member to share the outcome or quietly close the goal and start a new one.
+Kilo hedeflerine ulaşmaya çalışan kişiler genellikle planlarını bir yerde, motivasyonlarını ise başka bir yerde tutar. Actora, kişisel hedefleri ve topluluk etkileşimini tek bir platformda birleştirir: geri sayım içeren kişisel bir hedef ve eğitmenlerin ve üyelerin yaptıkları çalışmaları paylaştığı bir akış.
 
-## Features
+Hedef süresi sona erdiğinde uygulama, üyeden sonucunu paylaşmasını veya hedefi sonlandırıp yeni bir hedef belirlemesini ister.
 
-- **Accounts** – registration with a role (`Eğitmen` or `Eğitici`), sign-in, sign-out.
-- **Feed** – posts with a photo, title and description; search by title, description or author; filter by role; like posts.
-- **Your posts** – create posts, pin them to the top of your list, delete them.
-- **Saved posts** – bookmark posts from the feed; bookmarks are stored on the device.
-- **Profile** – photo, personal details, weight, height, target weight and goal length in days.
-- **Goal tracking** – progress bar for the goal period and an analysis dialog with the time elapsed and the planned weight path from current to target weight.
-- **Goal completion** – when the period ends, share the result as a post (what you ate, daily steps) or skip; either way the goal is cleared.
-- **BMI calculator** – available to the `Eğitmen` role.
-- **Account controls** – freeze the account (posts are hidden until the next sign-in) or delete it together with its posts.
-- **Light and dark themes** – follows the system preference and remembers a manual choice.
+## Özellikler
 
-## Screenshots
+- **Hesaplar** – `Eğitmen` veya `Eğitici` rolüyle kayıt olma, giriş yapma ve çıkış yapma.
+- **Akış** – Fotoğraf, başlık ve açıklama içeren gönderiler; başlığa, açıklamaya veya yazara göre arama; role göre filtreleme ve gönderileri beğenme.
+- **Gönderilerim** – Gönderi oluşturma, gönderileri listenin en üstüne sabitleme ve silme.
+- **Kaydedilen gönderiler** – Akıştaki gönderileri yer imlerine ekleme. Kaydedilen gönderiler cihazda saklanır.
+- **Profil** – Fotoğraf, kişisel bilgiler, kilo, boy, hedef kilo ve gün cinsinden hedef süresi.
+- **Hedef takibi** – Hedef süresindeki ilerlemeyi gösteren bir ilerleme çubuğu ve geçen süreyi, mevcut kilodan hedef kiloya uzanan planlanan kilo değişimini gösteren bir analiz penceresi.
+- **Hedef tamamlama** – Hedef süresi sona erdiğinde sonucu gönderi olarak paylaşma (beslenme ve günlük adım sayısı gibi bilgilerle) veya paylaşımı atlama.
+- **Vücut kitle indeksi (BMI) hesaplayıcısı** – `Eğitmen` rolüne sahip kullanıcılar tarafından kullanılabilir.
+- **Hesap kontrolleri** – Hesabı dondurma veya hesabı silme.
+- **Açık ve koyu temalar** – Sistem tercihini takip eder ve kullanıcının manuel tema seçimini hatırlar.
 
-All images are captures of the running application with demo data.
+## Ekran Görüntüleri
 
-| Sign in | Feed (dark theme) |
+Tüm görseller, demo verileriyle çalışan uygulamadan alınmıştır.
+
+| Giriş | Akış (koyu tema) |
 | --- | --- |
-| ![Sign-in page](docs/screenshots/login-desktop.png) | ![Feed in dark theme](docs/screenshots/feed-desktop-dark.png) |
+| ![Giriş sayfası](docs/screenshots/login-desktop.png) | ![Koyu temada akış](docs/screenshots/feed-desktop-dark.png) |
 
-| Profile | Goal analysis |
+| Profil | Hedef analizi |
 | --- | --- |
-| ![Profile page](docs/screenshots/profile-desktop.png) | ![Goal analysis dialog](docs/screenshots/goal-analysis-desktop.png) |
+| ![Profil sayfası](docs/screenshots/profile-desktop.png) | ![Hedef analizi penceresi](docs/screenshots/goal-analysis-desktop.png) |
 
-| New post | |
-| --- | --- |
-| ![Post composer dialog](docs/screenshots/post-composer-desktop.png) | |
+| Yeni gönderi |
+| --- |
+| ![Gönderi oluşturma penceresi](docs/screenshots/post-composer-desktop.png) |
 
-Mobile (390 px wide):
+### Mobil Görünüm (390 px)
 
-| Sign in | Feed | Profile | Goal analysis |
+| Giriş | Akış | Profil | Hedef analizi |
 | --- | --- | --- | --- |
-| ![Sign-in page on mobile](docs/screenshots/login-mobile.png) | ![Feed on mobile](docs/screenshots/feed-mobile.png) | ![Profile on mobile](docs/screenshots/profile-mobile.png) | ![Goal analysis on mobile](docs/screenshots/goal-analysis-mobile.png) |
+| ![Mobil giriş sayfası](docs/screenshots/login-mobile.png) | ![Mobil akış](docs/screenshots/feed-mobile.png) | ![Mobil profil](docs/screenshots/profile-mobile.png) | ![Mobil hedef analizi](docs/screenshots/goal-analysis-mobile.png) |
 
-## Tech stack
+## Teknoloji Yığını
 
-| Area | Technology | Used for |
-| --- | --- | --- |
-| Web | Next.js 15 (App Router), React 19 | Routing, rendering, image optimisation |
-| | Tailwind CSS 3 | Styling, driven by design tokens in `globals.css` |
-| | TanStack Query | Server-state caching and mutations |
-| | Axios | API client with auth and error handling in one place |
-| | Recharts | Goal analysis charts (loaded on demand) |
-| | Heroicons | Icons |
-| API | Node.js, Express 4 | REST API |
-| | MongoDB, Mongoose 7 | Data storage |
-| | JSON Web Tokens, bcryptjs | Sessions and password hashing |
-| | Multer | Image uploads |
-| | express-rate-limit | Throttling sign-in and registration attempts |
-| Tooling | ESLint, Vitest, `node:test` | Linting and tests |
+| Teknoloji | Kullanım amacı |
+| --- | --- |
+| Next.js 15 (App Router) | Sayfa yönlendirme, render işlemleri ve görsel optimizasyonu |
+| React 19 | Bileşen tabanlı kullanıcı arayüzü |
+| Tailwind CSS 3 | Tasarım değişkenleriyle stil yönetimi |
+| TanStack Query | Önbellekleme ve veri işlemlerinin yönetimi |
+| Axios | HTTP istekleri |
+| Recharts | Hedef analizi grafikleri |
+| Heroicons | İkonlar |
+| ESLint | Kod kalitesi ve statik analiz |
+| Vitest | Birim testleri |
 
-## Architecture
+## Frontend Mimarisi
 
-The repository holds two independent npm projects.
-
-```
-frontend/                 Next.js web client
-  src/app/                Routes, root layout, global styles, error and 404 pages
-    (app)/                Signed-in pages (feed, saved posts, profile) behind the app shell
-  src/components/ui/      Shared building blocks: Button, Field, Dialog, Tabs, Toast, ...
-  src/components/layout/  App shell, header, mobile navigation, theme toggle
-  src/features/           auth/, posts/, profile/ – screens, API calls and logic per feature
-  src/lib/                API client, localStorage store, formatting and media helpers
-  tests/                  Unit tests
-server/                   Express API
-  app.js, index.js        App factory and start-up
-  config/                 Environment validation and database connection
-  routes/, controllers/   HTTP layer
-  middleware/             Authentication, uploads, error handling
-  models/                 Mongoose schemas
-  utils/                  Validation, serialisation, image type detection
-  uploads/                Uploaded images (not committed)
-  tests/                  Unit tests
-docs/screenshots/         Images used in this README
+```text
+frontend/
+  src/
+    app/
+      (app)/                Oturum açmış kullanıcılara ait sayfalar
+                            (akış, kaydedilen gönderiler, profil)
+      components/           Uygulama rotaları ve sayfa yapıları
+      globals.css           Global stiller ve tasarım değişkenleri
+      layout.js             Kök yerleşim
+    components/
+      ui/                   Paylaşılan UI bileşenleri:
+                            Button, Field, Dialog, Tabs, Toast vb.
+      layout/               Uygulama kabuğu, başlık, mobil gezinme,
+                            tema değiştirme
+    features/
+      auth/                 Kimlik doğrulama arayüzü ve işlemleri
+      posts/                Gönderi özellikleri
+      profile/              Profil ve hedef yönetimi
+    lib/                    Yardımcı fonksiyonlar,
+                            biçimlendirme ve medya işlemleri
+  tests/                    Birim testleri
 ```
 
-Design decisions worth knowing:
+### Mimari Yaklaşım
 
-- **Sessions** are bearer tokens. The web client keeps the session in `localStorage` and sends the token on every request; a `401` response ends the session and returns the user to the sign-in page.
-- **Authorisation is enforced on the server.** Every route except sign-in and registration requires a token. Account routes only work for the account in the token; posts can only be changed by their author. The author of a new post comes from the session, not the request body.
-- **API responses are shaped explicitly.** Password hashes, author e-mail addresses and the list of users who liked a post never leave the server; posts carry `benim` (mine) and `begendi` (liked) flags instead.
-- **Design tokens** for colour are CSS variables in `frontend/src/app/globals.css`, exposed to Tailwind in `tailwind.config.js`. Light and dark themes only swap variable values.
-- **Dialogs** use the native `<dialog>` element, which provides the focus trap, Escape handling and inert background.
-- **Pure logic is separated from components** (BMI, goal progress, pinning, search, validation) so it can be unit-tested without a browser or database.
+- **Özellik bazlı organizasyon:** Kimlik doğrulama, gönderiler ve profil gibi işlevler ayrı modüllerde tutulur.
+- **Paylaşılan UI bileşenleri:** Tekrar kullanılabilir arayüz bileşenleri ortak bir yapıda düzenlenir.
+- **Tasarım değişkenleri:** Renkler `frontend/src/app/globals.css` dosyasındaki CSS değişkenleriyle yönetilir ve Tailwind'e aktarılır. Açık ve koyu temalar aynı değişken yapısını kullanır.
+- **Bileşenlerden ayrılmış iş mantığı:** BMI hesaplama, hedef ilerlemesi, gönderileri sabitleme, arama ve doğrulama gibi işlemler ayrı fonksiyonlarla yönetilir ve birim testleriyle doğrulanabilir.
+- **Erişilebilir diyaloglar:** Yerel HTML `dialog` öğesi odak yönetimi ve Escape tuşuyla kapatma gibi özellikler sağlar.
 
-### API overview
+## Kurulum ve Başlangıç
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| POST | `/kayit` | Register |
-| POST | `/login` | Sign in; reactivates a frozen account |
-| GET | `/kullanici/:id` | Own profile |
-| PUT | `/hesap/:id` | Update profile (JSON or multipart with `resim`), or freeze the account |
-| DELETE | `/kullanici/:id` | Delete account and its posts |
-| GET | `/post` | Feed, newest first (latest 200 posts) |
-| POST | `/post` | Create a post (multipart with `resim`) |
-| GET / PUT / DELETE | `/post/:id` | Read, edit or delete a post (edit and delete: author only) |
-| POST | `/post/:id/begen` | Like or unlike a post |
-
-## Getting started
-
-Requirements: Node.js 20 or newer and a MongoDB database.
-
-### 1. API
-
-```bash
-cd server
-npm install
-cp .env.example .env    # then fill in the values
-npm run dev
-```
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `MONGO_URI` | yes | MongoDB connection string |
-| `JWT_SECRET` | yes | Secret for signing session tokens, at least 32 characters |
-| `PORT` | no | Port to listen on (default `5233`) |
-| `CLIENT_ORIGIN` | no | Comma-separated web origins allowed by CORS (default `http://localhost:3000`) |
-| `TRUST_PROXY` | no | Number of reverse proxies in front of the API (default `0`) |
-
-The server refuses to start if a required variable is missing.
-
-### 2. Web client
+**Gereksinimler:** Node.js 20 veya üzeri.
 
 ```bash
 cd frontend
 npm install
 cp .env.example .env.local
+```
+
+`.env.local` dosyasındaki `NEXT_PUBLIC_BASE_PATH` değişkenini uygulamanın kullandığı servis adresine göre yapılandırın.
+
+Geliştirme sunucusunu başlatmak için:
+
+```bash
 npm run dev
 ```
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `NEXT_PUBLIC_BASE_PATH` | yes | Base URL of the API, e.g. `http://localhost:5233` |
+Tarayıcıdan `http://localhost:3000` adresini açın.
 
-Open <http://localhost:3000>.
+## Kullanılabilir Komutlar
 
-## Scripts
+| Komut | Açıklama |
+| --- | --- |
+| `npm run dev` | Geliştirme sunucusunu başlatır |
+| `npm run build` | Üretim derlemesini oluşturur |
+| `npm run start` | Üretim sunucusunu başlatır |
+| `npm run lint` | ESLint kod denetimini çalıştırır |
+| `npm test` | Birim testlerini çalıştırır |
 
-| Location | Command | Description |
-| --- | --- | --- |
-| `frontend` | `npm run dev` | Development server |
-| | `npm run build` / `npm run start` | Production build and server |
-| | `npm run lint` | ESLint |
-| | `npm test` | Unit tests (Vitest) |
-| `server` | `npm run dev` | API with automatic restart on changes |
-| | `npm start` | API |
-| | `npm test` | Unit tests (`node:test`) |
-
-## Testing
+## Testler
 
 ```bash
-cd frontend && npm run lint && npm test && npm run build
-cd server && npm test
+npm run lint
+npm test
+npm run build
 ```
 
-The unit tests cover input validation, token and ownership checks, upload type detection, response serialisation, environment validation, BMI and goal calculations, pinning, search, media URL handling and error messages. There are no automated component or end-to-end tests in the repository yet.
+Birim testleri şu alanları kapsar:
 
-## Deployment
+- Girdi doğrulama
+- BMI ve hedef hesaplamaları
+- Gönderileri sabitleme
+- Arama
+- Medya URL'lerinin işlenmesi
+- Hata mesajları
 
-- **API** – `server/Procfile` starts the API with `node index.js` on platforms that read Procfiles. Set the environment variables above, set `CLIENT_ORIGIN` to the deployed web origin and `TRUST_PROXY` to the number of proxies in front of the app. Uploaded images are written to `server/uploads` on local disk, so the host needs persistent storage (see limitations).
-- **Web client** – a standard Next.js application: `npm run build` then `npm run start`, or any host that supports Next.js. `NEXT_PUBLIC_BASE_PATH` must be set at build time because it is compiled into the client and used to allow the API host for image optimisation.
+Projede henüz otomatik bileşen testleri veya uçtan uca (E2E) testler bulunmamaktadır.
 
-## Security, accessibility and performance
+## Güvenlik, Erişilebilirlik ve Performans
 
-- Passwords are hashed with bcrypt; sign-in failures do not reveal whether an e-mail exists; sign-in and registration are rate-limited.
-- Uploads are limited to JPEG, PNG, WebP and GIF up to 5 MB, checked by file signature, stored under generated names and served with `nosniff` and a restrictive Content-Security-Policy.
-- Request bodies are validated and only whitelisted profile fields can be changed.
-- Forms use labelled native controls with inline errors, dialogs manage focus, interactive targets are at least 44 px on touch layouts, a skip link is provided and reduced-motion preferences are respected.
-- The charting library is loaded only when the analysis dialog opens, and post images go through `next/image` with fixed aspect ratios to avoid layout shift.
+- Formlarda etiketlenmiş yerel HTML kontrolleri ve alan içi hata mesajları kullanılır.
+- Diyaloglarda odak yönetimi sağlanır.
+- Dokunmatik ekranlardaki etkileşim alanları en az 44 px olacak şekilde tasarlanmıştır.
+- Klavye kullanıcıları için atlama bağlantısı bulunur.
+- Azaltılmış hareket tercihleri dikkate alınır.
+- Grafik kütüphanesi yalnızca hedef analizi penceresi açıldığında yüklenir.
+- Gönderi görselleri `next/image` üzerinden işlenir ve sabit en-boy oranlarıyla düzen kaymaları azaltılır.
+- Kaydedilen gönderiler ve tema tercihi cihazda saklanır.
 
-## Known limitations
+## Bilinen Sınırlamalar
 
-- The session token is kept in `localStorage`, so it would be readable by injected scripts if an XSS flaw were ever introduced. There is no refresh token; sessions last one day.
-- No Content-Security-Policy is set for the web client itself.
-- Uploaded images live on the API server's local disk; there is no object storage or CDN integration.
-- The feed returns the latest 200 posts without pagination.
-- Saved and pinned posts are stored per device and do not sync between devices. Saved posts are snapshots and do not update if the original changes.
-- There is no password reset, e-mail verification, post editing UI or commenting.
-- `npm audit` for the web client still reports advisories in build-time tooling that can only be cleared by major upgrades (Next.js 16 and Tailwind CSS 4).
-- "Actora" is a working product name; trademark and domain availability have not been checked.
-
-## License
-
-The repository does not include a license file. `server/package.json` declares `ISC`; add a `LICENSE` file to make the terms explicit.
+- Oturum bilgisi `localStorage` içinde tutulduğu için olası XSS açıklarında enjekte edilen betikler tarafından okunabilir.
+- Web istemcisi için ayrıca bir Content-Security-Policy (CSP) tanımlanmamıştır.
+- Akış, sayfalama olmadan en son 200 gönderiyi getirir.
+- Kaydedilen ve sabitlenen gönderiler cihazlar arasında senkronize edilmez.
+- Kaydedilen gönderiler anlık görüntü olarak saklandığı için orijinal gönderi değiştiğinde otomatik olarak güncellenmez.
+- Parola sıfırlama, e-posta doğrulama, gönderi düzenleme arayüzü ve yorum yapma özellikleri bulunmamaktadır.
+- `npm audit` çalıştırıldığında web istemcisinin derleme araçlarıyla ilgili bazı güvenlik uyarıları görülebilir.
